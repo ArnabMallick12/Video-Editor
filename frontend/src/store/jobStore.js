@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from '../lib/supabaseClient.js';
+import { supabase } from '../lib/supabaseClient';
 
 export const useJobStore = create((set, get) => ({
   jobs: [],
@@ -15,7 +15,9 @@ export const useJobStore = create((set, get) => ({
       set({ loading: true, error: null });
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session?.user) throw new Error('User not authenticated');
+      if (!session?.user) {
+        throw new Error('Not authenticated');
+      }
 
       const { data, error } = await supabase
         .from('jobs')
@@ -25,10 +27,9 @@ export const useJobStore = create((set, get) => ({
 
       if (error) throw error;
       set({ jobs: data, loading: false });
-      return data;
     } catch (error) {
-      set({ error: error.message, loading: false });
-      throw error;
+      console.error('Error fetching jobs:', error);
+      set({ error: error.message || 'Failed to fetch jobs', loading: false });
     }
   },
 
@@ -37,7 +38,9 @@ export const useJobStore = create((set, get) => ({
       set({ loading: true, error: null });
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session?.user) throw new Error('User not authenticated');
+      if (!session?.user) {
+        throw new Error('Not authenticated');
+      }
 
       const { data, error } = await supabase
         .from('jobs')
@@ -64,14 +67,13 @@ export const useJobStore = create((set, get) => ({
 
       if (error) throw error;
       
-      set((state) => ({
+      set(state => ({
         jobs: [data, ...state.jobs],
         loading: false
       }));
-      
-      return data;
     } catch (error) {
-      set({ error: error.message, loading: false });
+      console.error('Error adding job:', error);
+      set({ error: error.message || 'Failed to add job', loading: false });
       throw error;
     }
   },
@@ -81,7 +83,9 @@ export const useJobStore = create((set, get) => ({
       set({ loading: true, error: null });
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session?.user) throw new Error('User not authenticated');
+      if (!session?.user) {
+        throw new Error('Not authenticated');
+      }
 
       const { error } = await supabase
         .from('jobs')
@@ -91,12 +95,13 @@ export const useJobStore = create((set, get) => ({
 
       if (error) throw error;
       
-      set((state) => ({
+      set(state => ({
         jobs: state.jobs.filter(job => job.id !== jobId),
         loading: false
       }));
     } catch (error) {
-      set({ error: error.message, loading: false });
+      console.error('Error deleting job:', error);
+      set({ error: error.message || 'Failed to delete job', loading: false });
       throw error;
     }
   }

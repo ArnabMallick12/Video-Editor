@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJobStore } from '../store/jobStore';
 import { supabase } from '../lib/supabaseClient.js';
+import axiosInstance from '../lib/axiosInstance';
 
 export default function EditorPage() {
   const navigate = useNavigate();
@@ -212,17 +213,13 @@ export default function EditorPage() {
 
       console.log('Sending form data:', Object.fromEntries(formData.entries()));
 
-      const response = await fetch('http://localhost:5000/api/edit', {
-        method: 'POST',
-        body: formData,
+      const response = await axiosInstance.post('/edit', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Processing failed');
-      }
-
-      const data = await response.json();
+      const data = response.data;
       
       if (!data.success) {
         throw new Error(data.message || 'Processing failed');

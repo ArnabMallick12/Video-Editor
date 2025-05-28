@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEditorStore } from '../store/editStore';
+import axiosInstance from '../lib/axiosInstance';
 
 const ResultPage = () => {
   const navigate = useNavigate();
@@ -11,8 +12,10 @@ const ResultPage = () => {
   const handleDownload = async (url, filename) => {
     try {
       setDownloading(true);
-      const response = await fetch(url);
-      const blob = await response.blob();
+      const response = await axiosInstance.get(url, {
+        responseType: 'blob'
+      });
+      const blob = response.data;
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
